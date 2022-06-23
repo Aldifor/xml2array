@@ -85,16 +85,16 @@ function xml2array($url, $get_attributes = 1, $priority = 'tag')
                     );
                     $repeated_tag_index[$current_tag_index] = 2;
                 }
-                $last_item_index = $repeated_tag_index[$current_tag_index] - 1;
+                $last_item_index = $repeated_tag_index[$tag . '_' . $level] - 1;
                 $current = & $current[$tag][$last_item_index];
             }
         }
-		elseif ($type == "complete")
+        elseif ($type == "complete")
         {
             if (!isset ($current[$tag]))
             {
                 $current[$tag]['value'] = $result;
-                $repeated_tag_index[$current_tag_index] = 1;
+                $repeated_tag_index[$tag . '_' . $level] = 1;
                 if ($priority == 'tag' and $attributes_data)
                     $current[$tag]['attr'] = $attributes_data;
             }
@@ -104,14 +104,14 @@ function xml2array($url, $get_attributes = 1, $priority = 'tag')
                 {
                     if ($priority == 'tag' and $get_attributes and $attributes_data)
                     {
-                        $current[$tag][$repeated_tag_index[$current_tag_index]]['value'] = $result;
+                        $current[$tag][$repeated_tag_index[$tag . '_' . $level]]['value'] = $result;
 
-                        $current[$tag][$repeated_tag_index[$current_tag_index]]['attr'] = $attributes_data;
+                        $current[$tag][$repeated_tag_index[$tag . '_' . $level]]['attr'] = $attributes_data;
                     }else{
-                        $current[$tag][$repeated_tag_index[$current_tag_index]]['value'] = $result;
+                        $current[$tag][$repeated_tag_index[$tag . '_' . $level]]['value'] = $result;
 
                     }
-                    $repeated_tag_index[$current_tag_index]++;
+                    $repeated_tag_index[$tag . '_' . $level]++;
                 }
                 else
                 {
@@ -121,22 +121,23 @@ function xml2array($url, $get_attributes = 1, $priority = 'tag')
                             'value' => $result
                         ]
                     );
-                    $repeated_tag_index[$current_tag_index] = 1;
+                    $repeated_tag_index[$tag . '_' . $level] = 1;
                     if ($priority == 'tag' and $get_attributes)
                     {
                         if ($attributes_data)
                         {
-                            $current[$tag][$repeated_tag_index[$current_tag_index]]['attr'] = $attributes_data;
+                            $current[$tag][$repeated_tag_index[$tag . '_' . $level]]['attr'] = $attributes_data;
                         }
                     }
-                    $repeated_tag_index[$current_tag_index]++; //0 and 1 index is already taken
+                    $repeated_tag_index[$tag . '_' . $level]++; //0 and 1 index is already taken
                 }
             }
         }
-		elseif ($type == 'close')
+        elseif ($type == 'close')
         {
             $current = & $parent[$level -1];
         }
     }
     return ($xml_array);
+}
 }
