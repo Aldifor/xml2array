@@ -1,6 +1,64 @@
 <?php
 include 'dd.php';
-dd(xml2array($_SERVER['DOCUMENT_ROOT'].'/files/test kaspi.xml'),1);
+dd(generateXml(xml2array($_SERVER['DOCUMENT_ROOT'].'/files/test kaspi.xml')),1);
+/**
+ * @param $array
+ * @return false|string
+ */
+function generateXml($array)
+{
+    $dom = new DomDocument('1.0', 'UTF-8');
+    $dom->formatOutput = true;
+    elementXml($array, $dom, $dom);
+    return $dom->saveXML();
+}
+
+function elementXml($array, &$parent, &$dom, $elementTag = null)
+{
+    foreach ($array as $key => $item) {
+        if ($key === 'value'){
+            continue;
+        }
+        if (!isset($item[0])){
+            $element = $dom->createElement($elementTag ?: $key);
+
+        }
+        if (isset($item['attr'])) {
+            foreach ($item['attr'] ?: [] as $kAttr => $vAttr) {
+                $attr = $dom->createAttribute($kAttr);
+                $attr->appendChild($dom->createTextNode($vAttr));
+
+                $element->appendChild($attr);
+            }
+            unset($item['attr']);
+        }
+        if (!empty($item['value'])) {
+
+            $element->appendChild($dom->createTextNode($item['value']));
+            unset($item['value']);
+        }
+
+        if (!empty($item)) {
+            foreach ($item as $childKey => $childValue) {
+                if (is_int($childKey)) {
+                    $childKey = $key;
+                    elementXml([
+                        $childKey => $childValue
+                    ], $parent, $dom);
+                    continue;
+                }
+                elementXml([
+                    $childKey => $childValue
+                ], $element, $dom);
+
+            }
+        }
+        if (!empty($element)){
+            $parent->appendChild($element);
+        }
+    }
+}
+
 function xml2array($url, $get_attributes = 1, $priority = 'tag')
 {
     $contents = "";
